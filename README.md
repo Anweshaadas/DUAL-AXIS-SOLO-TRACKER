@@ -11,15 +11,10 @@ The system dynamically aligns the solar panel to maximize sunlight exposure, mea
 🎯 Objectives
 
 Maximize solar energy harvesting using dual-axis tracking
-
 Measure real-time solar panel voltage, current, and power
-
 Predict solar power output using machine learning
-
 Integrate live weather data for better prediction accuracy
-
 Enable remote monitoring using IoT (Blynk)
-
 Create a scalable and research-oriented solar monitoring system
 
 🧠 System Architecture
@@ -32,7 +27,7 @@ Voltage Divider ─┘
 ESP32 ── WiFi ── Weather API ── ML Model ── Power Prediction
 ESP32 ── Blynk ── Remote Monitoring Dashboard
 
-🛠️ Updated Hardware Requirements
+🛠️ Hardware Requirements
 Component	Purpose
 ESP32	Main controller & Wi-Fi communication
 Solar Panel	Energy generation
@@ -44,90 +39,53 @@ ACS712 (5A)	Current measurement
 Voltage Divider (100kΩ + 10kΩ)	Solar panel voltage measurement
 MPU6050	Orientation & motion sensing
 Connecting Wires & Breadboard	Circuit connections
-💻 Updated Software Requirements
+
+💻Software Requirements
 
 Arduino IDE
-
 ESP32 Board Package
-
 Python 3.x
-
 Blynk IoT Platform
-
 OpenWeatherMap API
-
 Machine Learning Libraries
-
 NumPy
-
 Pandas
-
 Scikit-learn
-
 Matplotlib
-
 Seaborn
-
 🔌 Power Measurement Method
 🔹 Voltage Measurement
-
 Solar panel voltage is stepped down using a voltage divider
-
 ESP32 ADC reads safe voltage (≤ 3.3V)
-
 Actual voltage calculated as:
-
 Vsolar = Vadc × (R1 + R2) / R2
-
 🔹 Current Measurement
-
 ACS712 measures DC current (mA)
-
 Converted to Amps in firmware
-
 🔹 Power Calculation
 Power (W) = Voltage (V) × Current (A)
 
 🤖 Machine Learning Models
-
 The project uses a trained regression model to predict solar power output based on:
-
 Temperature
-
 Humidity
-
 Solar radiation
-
 Light intensity
-
 Weather parameters
-
 Models Used:
-
 Linear Regression
-
 Decision Tree Regressor
-
 Random Forest Regressor (Primary Model)
-
 The trained model is exported and integrated into the ESP32 firmware.
 
 🌦️ Weather Data Integration
-
 Live weather data fetched using OpenWeatherMap API
-
 Parameters used:
-
 Temperature
-
 Humidity
-
 Pressure
-
 Wind speed
-
 Visibility
-
 Improves accuracy of power prediction
 
 📂 Project Structure
@@ -141,44 +99,18 @@ DUAL-AXIS-SOLO-TRACKER/
 └── README.md
 
 🚀 Features
-
 Dual-axis solar tracking
-
 Real-time voltage, current & power measurement
-
 Weather-aware power prediction
-
 Machine learning integration
-
 IoT-based remote monitoring (Blynk)
-
 Data visualization & analysis
-
 Research and industry-ready architecture
 
 🔮 Future Enhancements
-
 Cloud database storage (Firebase / AWS)
-
 Mobile app for monitoring
-
 MPPT integration
-
 Battery charging analytics
-
 Deep learning (LSTM) for time-series prediction
-
 Edge ML optimization on ESP32
-
-🤝 Contribution & Usage
-
-This project is open source ❤️
-You are free to:
-
-Use the code
-
-Modify and extend features
-
-Use it for academic or research purposes
-
-📌 Please give proper credit if you use or modify this project.
