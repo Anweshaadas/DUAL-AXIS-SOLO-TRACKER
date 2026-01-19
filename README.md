@@ -1,38 +1,108 @@
-☀️ Dual-Axis Solar Tracker with Power Prediction
+☀️ Dual-Axis Solar Tracker with Power Measurement & Prediction
+🔓 Open Source Project
 
-An IoT-enabled dual-axis solar tracking system integrated with machine learning models to maximize solar energy harvesting and accurately predict power generation.
+An IoT-enabled dual-axis solar tracking system that measures real solar power output and predicts future power generation using machine learning and weather data.
 
-🧩 Project Summary
+📌 Project Overview
 
-This project combines embedded systems, IoT, and machine learning to build a smart dual-axis solar tracker capable of predicting solar power output using real-time sensor data and weather information.
-The system continuously aligns solar panels for maximum sunlight exposure and applies regression models to forecast power generation.
+This project implements a dual-axis solar tracker using ESP32, combined with real-time power measurement and machine learning-based power prediction.
+The system dynamically aligns the solar panel to maximize sunlight exposure, measures actual voltage, current, and power, integrates live weather data, and predicts solar power output using a trained regression model.
 
-🧠 Core Technologies
-Domain	Tools / Technologies
-Programming	Python, Arduino
-IoT	ESP32, Sensors
-Machine Learning	Random Forest, Decision Tree, Linear Regression
-Data Analysis	Pandas, Matplotlib, Seaborn
-APIs	OpenWeatherMap
-Hardware Control	Arduino, ESP32
-🏗️ System Components
-🔌 Hardware & Sensors
+🎯 Objectives
 
-DHT11 – Temperature & Humidity sensing
+Maximize solar energy harvesting using dual-axis tracking
 
-BH1750 – Light intensity measurement
+Measure real-time solar panel voltage, current, and power
 
-MPU6050 – Orientation and motion tracking
+Predict solar power output using machine learning
 
-ACS712 – Current sensing for power monitoring
+Integrate live weather data for better prediction accuracy
 
-Dual-Axis Mechanism – Maximizes solar exposure
+Enable remote monitoring using IoT (Blynk)
 
-Arduino + ESP32 – Control, communication & data transfer
+Create a scalable and research-oriented solar monitoring system
 
-🤖 Machine Learning Models Used
+🧠 System Architecture
+LDR Sensors ──┐
+              ├── ESP32 ── Servo Motors (Dual Axis Tracking)
+BH1750 ───────┘
+DHT11 ───────────┐
+ACS712 ──────────┼── Power Calculation (V × I)
+Voltage Divider ─┘
+ESP32 ── WiFi ── Weather API ── ML Model ── Power Prediction
+ESP32 ── Blynk ── Remote Monitoring Dashboard
 
-The following regression models are trained to predict solar power output:
+🛠️ Updated Hardware Requirements
+Component	Purpose
+ESP32	Main controller & Wi-Fi communication
+Solar Panel	Energy generation
+Dual-Axis Servo Motors	Solar panel alignment
+LDR Sensors	Sunlight direction detection
+BH1750	Light intensity measurement (lux)
+DHT11	Temperature & humidity sensing
+ACS712 (5A)	Current measurement
+Voltage Divider (100kΩ + 10kΩ)	Solar panel voltage measurement
+MPU6050	Orientation & motion sensing
+Connecting Wires & Breadboard	Circuit connections
+💻 Updated Software Requirements
+
+Arduino IDE
+
+ESP32 Board Package
+
+Python 3.x
+
+Blynk IoT Platform
+
+OpenWeatherMap API
+
+Machine Learning Libraries
+
+NumPy
+
+Pandas
+
+Scikit-learn
+
+Matplotlib
+
+Seaborn
+
+🔌 Power Measurement Method
+🔹 Voltage Measurement
+
+Solar panel voltage is stepped down using a voltage divider
+
+ESP32 ADC reads safe voltage (≤ 3.3V)
+
+Actual voltage calculated as:
+
+Vsolar = Vadc × (R1 + R2) / R2
+
+🔹 Current Measurement
+
+ACS712 measures DC current (mA)
+
+Converted to Amps in firmware
+
+🔹 Power Calculation
+Power (W) = Voltage (V) × Current (A)
+
+🤖 Machine Learning Models
+
+The project uses a trained regression model to predict solar power output based on:
+
+Temperature
+
+Humidity
+
+Solar radiation
+
+Light intensity
+
+Weather parameters
+
+Models Used:
 
 Linear Regression
 
@@ -40,88 +110,75 @@ Decision Tree Regressor
 
 Random Forest Regressor (Primary Model)
 
-📌 Predictions are based on:
-
-Sensor readings
-
-Weather conditions
-
-Historical power data
+The trained model is exported and integrated into the ESP32 firmware.
 
 🌦️ Weather Data Integration
 
-Real-time weather data fetched using OpenWeatherMap API
+Live weather data fetched using OpenWeatherMap API
 
-Historical weather dataset (Antwerp) used for training and testing
-
-Improves prediction accuracy by incorporating:
+Parameters used:
 
 Temperature
 
 Humidity
 
-Light intensity
+Pressure
 
-Weather conditions
+Wind speed
 
-📊 Data Processing & Analysis
-Python Scripts & Notebooks
-File	Purpose
-converter.ipynb	Data preprocessing, Random Forest training, feature extraction, and model export
-final.ipynb	Dataset merging, regression modeling, evaluation, and visualization
-Libraries Used
+Visibility
 
-Pandas – Data manipulation
-
-Matplotlib – Graph plotting
-
-Seaborn – Statistical visualizations
-
-📈 Key Features
-
-✅ Dual-axis solar tracking for maximum efficiency
-✅ Real-time sensor data acquisition
-✅ Machine learning-based power prediction
-✅ Weather-enhanced prediction accuracy
-✅ Power trend visualization & analysis
-✅ IoT-enabled monitoring
+Improves accuracy of power prediction
 
 📂 Project Structure
-Dual-Axis-Solar-Tracker/
+DUAL-AXIS-SOLO-TRACKER/
 │
-├── converter.ipynb     # Feature extraction & Random Forest training
-├── final.ipynb         # Regression models & visualization
-├── datasets/           # Weather & power datasets
-├── arduino_code/       # Embedded system code
+├── ESP32 code.ino              # Main firmware (tracking + power + IoT)
+├── File converter.ipynb        # Data processing & model training
+├── Power Prediction code.ipynb # ML power prediction analysis
+├── Weather Prediction Code.ipynb
+├── random_forest_model.pkl     # Trained ML model
 └── README.md
 
-⚙️ Installation & Usage
-1️⃣ Clone the Repository
-git clone https://github.com/kavindu26589/Dual-Axis-Solar-Tracker-Project.git
+🚀 Features
 
-2️⃣ Install Python Dependencies
-pip install pandas matplotlib seaborn scikit-learn
+Dual-axis solar tracking
 
-3️⃣ Run Notebooks
+Real-time voltage, current & power measurement
 
-Open converter.ipynb → Train model & extract features
+Weather-aware power prediction
 
-Open final.ipynb → Analyze data & visualize results
+Machine learning integration
 
-4️⃣ Upload Embedded Code
+IoT-based remote monitoring (Blynk)
 
-Flash Arduino & ESP32 with provided firmware
+Data visualization & analysis
 
-Connect sensors and power supply
+Research and industry-ready architecture
 
 🔮 Future Enhancements
 
-Deep Learning (LSTM) for time-series prediction
+Cloud database storage (Firebase / AWS)
 
-Cloud dashboard for live monitoring
+Mobile app for monitoring
 
-Mobile app integration
+MPPT integration
 
-Solar efficiency analytics
+Battery charging analytics
 
-Edge ML deployment on ESP32
+Deep learning (LSTM) for time-series prediction
+
+Edge ML optimization on ESP32
+
+🤝 Contribution & Usage
+
+This project is open source ❤️
+You are free to:
+
+Use the code
+
+Modify and extend features
+
+Use it for academic or research purposes
+
+📌 Please give proper credit if you use or modify this project.
