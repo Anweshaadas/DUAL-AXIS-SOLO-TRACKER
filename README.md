@@ -1,73 +1,127 @@
-# 🌞 Dual Axis Solar Tracker Power Prediction
+☀️ Dual-Axis Solar Tracker with Power Prediction
 
-## Tech Stack
-- **Python**
-- **Arduino**
-- **ESP32**
-- **Random Forest**
-- **Machine Learning**
-- **IoT**
+An IoT-enabled dual-axis solar tracking system integrated with machine learning models to maximize solar energy harvesting and accurately predict power generation.
 
----
+🧩 Project Summary
 
-## 📖 Description
-This project implements a dual-axis solar tracker system with integrated power prediction capabilities. It uses advanced IoT hardware, machine learning models, and data analysis tools to optimize solar energy harvesting. 
+This project combines embedded systems, IoT, and machine learning to build a smart dual-axis solar tracker capable of predicting solar power output using real-time sensor data and weather information.
+The system continuously aligns solar panels for maximum sunlight exposure and applies regression models to forecast power generation.
 
-### Key Components:
-1. **IoT and Sensors**:
-   - DHT11: Measures temperature and humidity.
-   - BH1750: Measures light intensity.
-   - MPU6050: Monitors orientation and movement.
-   - ACS712: Tracks current for power monitoring.
-   
-2. **Embedded Systems**:
-   - Arduino and ESP32: Used for hardware control and data collection.
+🧠 Core Technologies
+Domain	Tools / Technologies
+Programming	Python, Arduino
+IoT	ESP32, Sensors
+Machine Learning	Random Forest, Decision Tree, Linear Regression
+Data Analysis	Pandas, Matplotlib, Seaborn
+APIs	OpenWeatherMap
+Hardware Control	Arduino, ESP32
+🏗️ System Components
+🔌 Hardware & Sensors
 
-3. **Machine Learning Models**:
-   - Linear Regression
-   - Random Forest Regressor
-   - Decision Tree Regressor  
-   These models predict solar power generation based on historical and real-time data.
+DHT11 – Temperature & Humidity sensing
 
-4. **Weather Integration**:
-   - Weather data from OpenWeatherMap API enhances prediction accuracy.
-   - Historical weather data from Antwerp used for power prediction experiments.
+BH1750 – Light intensity measurement
 
-5. **Data Processing and Analysis**:
-   - Files `converter.py` and `final.py`:
-     - `converter.py`: Handles dataset processing, Random Forest model training, and feature extraction for IoT integration.
-     - `final.py`: Merges weather and power data, builds regression models, and provides detailed data analysis and visualization.
+MPU6050 – Orientation and motion tracking
 
-6. **Visualization**:
-   - Data preprocessing, visualization, and analysis using:
-     - Pandas
-     - Matplotlib
-     - Seaborn
+ACS712 – Current sensing for power monitoring
 
----
+Dual-Axis Mechanism – Maximizes solar exposure
 
-## 🚀 Features
-- Real-time sensor data acquisition.
-- Dual-axis solar tracker for optimized sunlight absorption.
-- Machine learning-based solar power prediction.
-- Weather data integration for enhanced prediction.
-- Data visualization for daily solar power trends.
+Arduino + ESP32 – Control, communication & data transfer
 
----
+🤖 Machine Learning Models Used
 
-## 📂 File Descriptions
-- **`File converter.ipynb`**:
-  - Data processing and Random Forest model training.
-  - Generates feature importance and exports model headers for embedded systems.
+The following regression models are trained to predict solar power output:
 
-- **`File converter.ipynb`**:
-  - Merges historical weather and power datasets.
-  - Builds regression models and evaluates performance.
-  - Visualizes weather conditions and solar power trends.
+Linear Regression
 
----
+Decision Tree Regressor
 
-## 🛠️ Installation and Usage
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/kavindu26589/Dual-Axis-Solar-Tracker-Project.git
+Random Forest Regressor (Primary Model)
+
+📌 Predictions are based on:
+
+Sensor readings
+
+Weather conditions
+
+Historical power data
+
+🌦️ Weather Data Integration
+
+Real-time weather data fetched using OpenWeatherMap API
+
+Historical weather dataset (Antwerp) used for training and testing
+
+Improves prediction accuracy by incorporating:
+
+Temperature
+
+Humidity
+
+Light intensity
+
+Weather conditions
+
+📊 Data Processing & Analysis
+Python Scripts & Notebooks
+File	Purpose
+converter.ipynb	Data preprocessing, Random Forest training, feature extraction, and model export
+final.ipynb	Dataset merging, regression modeling, evaluation, and visualization
+Libraries Used
+
+Pandas – Data manipulation
+
+Matplotlib – Graph plotting
+
+Seaborn – Statistical visualizations
+
+📈 Key Features
+
+✅ Dual-axis solar tracking for maximum efficiency
+✅ Real-time sensor data acquisition
+✅ Machine learning-based power prediction
+✅ Weather-enhanced prediction accuracy
+✅ Power trend visualization & analysis
+✅ IoT-enabled monitoring
+
+📂 Project Structure
+Dual-Axis-Solar-Tracker/
+│
+├── converter.ipynb     # Feature extraction & Random Forest training
+├── final.ipynb         # Regression models & visualization
+├── datasets/           # Weather & power datasets
+├── arduino_code/       # Embedded system code
+└── README.md
+
+⚙️ Installation & Usage
+1️⃣ Clone the Repository
+git clone https://github.com/kavindu26589/Dual-Axis-Solar-Tracker-Project.git
+
+2️⃣ Install Python Dependencies
+pip install pandas matplotlib seaborn scikit-learn
+
+3️⃣ Run Notebooks
+
+Open converter.ipynb → Train model & extract features
+
+Open final.ipynb → Analyze data & visualize results
+
+4️⃣ Upload Embedded Code
+
+Flash Arduino & ESP32 with provided firmware
+
+Connect sensors and power supply
+
+🔮 Future Enhancements
+
+Deep Learning (LSTM) for time-series prediction
+
+Cloud dashboard for live monitoring
+
+Mobile app integration
+
+Solar efficiency analytics
+
+Edge ML deployment on ESP32
