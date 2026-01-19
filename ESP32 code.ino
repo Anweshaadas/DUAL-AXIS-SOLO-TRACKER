@@ -10,283 +10,172 @@
 #include <BH1750.h>
 #include "time.h"
 #include <HTTPClient.h>
+#include <Servo.h>
 #include <Arduino_JSON.h>
-#include <Blynk.h>
-#include "D:\arduino-1.8.19\libraries\Random_Forest.h"
+
+// ML model
+#include "D:\\arduino-1.8.19\\libraries\\Random_Forest.h"
+
+// ================== BLYNK ==================
+#define BLYNK_PRINT Serial
+#define BLYNK_TEMPLATE_ID "TMPL6RKIpiE7q"
+#define BLYNK_DEVICE_NAME "fyp"
 
 char auth[] = "n3KDCJEb8CdgBeA0UgWSHcUGa9viduA4";
 char ssid[] = "KAVINDU";
 char pass[] = "password";
+
+// ================== WEATHER ==================
 const char* ntpServer = "pool.ntp.org";
-const long  gmtOffset_sec = 0;
-const int   daylightOffset_sec = 3600;
+const long gmtOffset_sec = 0;
+const int daylightOffset_sec = 3600;
 const char* openWeatherMapApiKey = "fb73d4644cc4e9bf9de38de50222c6fc";
-String city = "Colombo"; // City name
-String countryCode = "LK"; // Country code (e.g., US)
-unsigned long lastTime = 0;
-unsigned long timerDelay = 6000; // Set the timer to 10 minutes (600000 milliseconds)
+String city = "Colombo";
+String countryCode = "LK";
 
-//char ssid[] = "EN20027360";
-//char pass[] = "12345678";
-
-#define BLYNK_PRINT Serial
-#define BLYNK_TEMPLATE_ID "TMPL6RKIpiE7q"
-#define BLYNK_DEVICE_NAME "fyp"
-#define DHTPIN 4     
+// ================== DHT ==================
+#define DHTPIN 4
 #define DHTTYPE DHT11
-
-WiFiServer server(80);
-
-Adafruit_MPU6050 mpu;
 DHT_Unified dht(DHTPIN, DHTTYPE);
-uint32_t delayMS;
-ACS712  ACS(25, 3.3, 4095, 185);
-const int voltPin = 34;
-float ADC_VALUE = 0;
-float voltage_value = 0;
-BlynkTimer timer;
+
+// ================== OBJECTS ==================
+WiFiServer server(80);
+Adafruit_MPU6050 mpu;
 BH1750 lightMeter(0x23);
-float power = 0;
-float x,y,z = 0;
-String weather;
-double pressure;
-double visibility;
-double wind;
-double visible;
-String currentDate;
-String currentTimeStr;
-String header;
-double temperature,temp;
-double humidity;
+BlynkTimer timer;
 
+// ================== POWER MEASUREMENT ==================
+ACS712 ACS(25, 3.3, 4095, 185);   // ACS712-5A
+const int voltPin = 34;
 
-void setup(void) {
+// Voltage divider values
+const float R1 = 100000.0;   // 100k ohm
+const float R2 = 10000.0;    // 10k ohm
+
+// ================== VARIABLES ==================
+float voltage_value = 0;
+float current_mA = 0;
+float current_A = 0;
+float power_W = 0;
+
+double temperature, humidity, wind, pressure, visibility;
+double tempC;
+float lux, irr, radiation;
+
+unsigned long lastTime = 0;
+unsigned long timerDelay = 600000;
+
+// ================== SETUP ==================
+void setup() {
   Serial.begin(115200);
   Wire.begin();
-  while (!Serial)
-    delay(10); 
 
   Blynk.begin(auth, ssid, pass);
+
   ACS.autoMidPoint();
 
-
-  if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
-    Serial.println(F("BH1750 Advanced begin"));
-  } else {
-    Serial.println(F("Error initialising BH1750"));
+  if (!lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
+    Serial.println("BH1750 error");
   }
 
-  Serial.println("");
-  delay(100);
-
-
   dht.begin();
-  lightMeter.begin();
-  sensor_t sensor;
-  dht.temperature().getSensor(&sensor);
-  dht.humidity().getSensor(&sensor);
-  delayMS = sensor.min_delay / 1000;
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-  printLocalTime();
 }
 
+// ================== HTTP REQUEST ==================
 String httpGETRequest(const char* serverName) {
   WiFiClient client;
   HTTPClient http;
-
-  // Your Domain name with URL path or IP address with path
   http.begin(client, serverName);
-
-  // Send HTTP GET request
   int httpResponseCode = http.GET();
-
   String payload = "{}";
-
-  if (httpResponseCode > 0) {
-    Serial.print("HTTP Response code: ");
-    Serial.println(httpResponseCode);
-    payload = http.getString();
-  } else {
-    Serial.print("Error code: ");
-    Serial.println(httpResponseCode);
-  }
-  // Free resources
+  if (httpResponseCode > 0) payload = http.getString();
   http.end();
-
   return payload;
 }
 
-void printLocalTime(){
-  struct tm timeinfo;
-  if(!getLocalTime(&timeinfo)){
-    Serial.println("Failed to obtain time");
-    return;
-  }
-  timeinfo.tm_hour += 5;
-  timeinfo.tm_min += 30;
-
-  // Adjust for overflow
-  if (timeinfo.tm_min >= 60) {
-    timeinfo.tm_min -= 60;
-    timeinfo.tm_hour += 1;
-  }
-
-  Serial.println(&timeinfo, "%B %d %Y %H:%M");
-  Serial.print("Day of week: ");
-  Serial.println(&timeinfo, "%A");
-  Serial.print("Month: ");
-  Serial.println(&timeinfo, "%B");
-  Serial.print("Day of Month: ");
-  Serial.println(&timeinfo, "%d");
-  Serial.print("Year: ");
-  Serial.println(&timeinfo, "%Y");
-  Serial.print("Hour: ");
-  Serial.println(&timeinfo, "%H");
-  Serial.print("Hour (12 hour format): ");
-  Serial.println(&timeinfo, "%I");
-  Serial.print("Minute: ");
-  Serial.println(&timeinfo, "%M");
-  Serial.print("Second: ");
-  Serial.println(&timeinfo, "%S");
-
-  Serial.println("Time variables");
-  char timeHour[3];
-  strftime(timeHour,3, "%H", &timeinfo);
-  Serial.println(timeHour);
-  char timeWeekDay[10];
-  strftime(timeWeekDay,10, "%A", &timeinfo);
-  Serial.println(timeWeekDay);
-  Serial.println();
-  char formattedTime[50]; // This variable will store the formatted date and time
-  strftime(formattedTime, sizeof(formattedTime), "%B %d %Y %H:%M", &timeinfo);
-  Serial.println(formattedTime);
-  Blynk.virtualWrite(V10, formattedTime); 
-}
-
+// ================== LOOP ==================
 void loop() {
-  WiFiClient client = server.available();   // Listen for incoming clients
-  Serial.println("");
-  
+
+  // ===== TEMPERATURE & HUMIDITY =====
   sensors_event_t event;
+  dht.temperature().getEvent(&event);
+  temperature = event.temperature;
+  tempC = temperature;
+
   dht.humidity().getEvent(&event);
-  if (isnan(event.relative_humidity)) {
-    Serial.println(F("Error reading humidity!"));
-  }
-  else {
-    Serial.print(F("Humidity: "));
-    Serial.print(event.relative_humidity);
-    Serial.println(F("%"));
-  }
-  float mA = ACS.mA_DC();
-  Serial.print("Current:");
-  Serial.println(mA);
-  
-  ADC_VALUE = analogRead(voltPin);
-  voltage_value = (ADC_VALUE * 3.3 ) / (4095);
-  Serial.print("Voltage = ");
-  Serial.print(voltage_value);
-  Serial.println("V");
+  humidity = event.relative_humidity;
 
-  power = voltage_value*mA;
-  Serial.print("Power = ");
-  Serial.print(power);
-  Serial.println("W");
+  // ===== CURRENT =====
+  current_mA = ACS.mA_DC();
+  current_A = current_mA / 1000.0;
 
-  float lux = lightMeter.readLightLevel();
-  Serial.print("Light: ");
-  Serial.print(lux);
-  Serial.println(" lx");
-  float irr = (lux*0.0079);
-  Serial.print("irradiance: ");
-  Serial.print(irr);
-  Serial.println(" W/m2");
-  float radiation = (irr/375000); //Solar Irradiance (W/m²) = Solar Radiation (Joules) / Area (m²) / Time (seconds)(750mm*500mm)
-  Serial.print("Radiation: ");
-  Serial.print(radiation);
-  Serial.println("W");
+  // ===== VOLTAGE (FIXED WITH DIVIDER) =====
+  float adc = analogRead(voltPin);
+  float adc_voltage = (adc * 3.3) / 4095.0;
+  voltage_value = adc_voltage * ((R1 + R2) / R2);
 
-  delay(1000);
+  // ===== POWER =====
+  power_W = voltage_value * current_A;
 
-   // Send an HTTP GET request
-  if ((millis() - lastTime) > timerDelay) {
-    // Check WiFi connection status
-    if (WiFi.status() == WL_CONNECTED) {
-      String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + countryCode + "&appid=" + openWeatherMapApiKey;
+  Serial.println("------ POWER DATA ------");
+  Serial.print("Voltage (V): "); Serial.println(voltage_value);
+  Serial.print("Current (A): "); Serial.println(current_A);
+  Serial.print("Power (W): "); Serial.println(power_W);
 
-      String jsonBuffer = httpGETRequest(serverPath.c_str());
-      Serial.println(jsonBuffer);
+  // ===== LIGHT & IRRADIANCE =====
+  lux = lightMeter.readLightLevel();
+  irr = lux * 0.0079;
+  radiation = irr / 375000.0;
 
-      JSONVar myObject = JSON.parse(jsonBuffer);
+  // ===== WEATHER API =====
+  if ((millis() - lastTime) > timerDelay && WiFi.status() == WL_CONNECTED) {
+    String serverPath =
+      "http://api.openweathermap.org/data/2.5/weather?q=" +
+      city + "," + countryCode + "&appid=" + openWeatherMapApiKey;
 
-      // Check if JSON parsing was successful
-      if (JSON.typeof(myObject) == "undefined") {
-        Serial.println("Parsing input failed!");
-      } else {
-        Serial.println("JSON object received.");
-        Serial.print("Temperature: ");
-        Serial.println(myObject["main"]["temp"]);
-        Serial.print("Pressure: ");
-        Serial.println(myObject["main"]["pressure"]);
-        Serial.print("Humidity: ");
-        Serial.println(myObject["main"]["humidity"]);
-        Serial.print("Wind Speed: ");
-        Serial.println(myObject["wind"]["speed"]);
-        Serial.print("Visibility: ");
-        Serial.println(myObject["visibility"]); // Visibility in meters
-        Serial.print("Weather: ");
-        Serial.println(myObject["weather"][0]["description"]);
-        String weather = (myObject["weather"][0]["description"]);
-      //  Serial.println(weather);
-        Blynk.virtualWrite(V4, weather); 
-        // Convert JSON values to appropriate types and assign to variables
-        pressure = myObject["main"]["pressure"];
-        visibility = myObject["visibility"];
-        visible = visibility/1000;
-        wind = myObject["wind"]["speed"];
-        temperature = myObject["main"]["temp"];
-        humidity = myObject["main"]["humidity"];
-        temp = temperature - 273.15;
-      }
-    } else {
-      Serial.println("WiFi Disconnected");
+    String jsonBuffer = httpGETRequest(serverPath.c_str());
+    JSONVar data = JSON.parse(jsonBuffer);
+
+    if (JSON.typeof(data) != "undefined") {
+      pressure = data["main"]["pressure"];
+      wind = data["wind"]["speed"];
+      visibility = data["visibility"];
     }
     lastTime = millis();
   }
-  
-  //humidity = event.relative_humidity;
-  
-  delay(100);
 
-  float feature_values[] = {temp, humidity, radiation,temp, humidity, radiation,temp, humidity, radiation}; // Replace with actual feature values
-  float prediction = intercept; // Initialize with the intercept
-  float prepower;
-  int numCoefficients = sizeof(coefficients) / sizeof(coefficients[0]);
+  // ===== ML PREDICTION =====
+  float feature_values[] = {
+    tempC, humidity, radiation,
+    tempC, humidity, radiation,
+    tempC, humidity, radiation
+  };
 
-  for (int i = 0; i < numCoefficients; i++) {
+  float prediction = intercept;
+  for (int i = 0; i < sizeof(coefficients) / sizeof(coefficients[0]); i++) {
     prediction += coefficients[i] * feature_values[i];
   }
 
-  // Print the prediction to the serial monitor
-  Serial.print("Prediction: ");
-  Serial.println(prediction, 4); // Print with 4 decimal places
-  prepower = (prediction*6)/5000;
-  // Delay for demonstration purposes (adjust as needed)
-  delay(5000);
+  float predicted_power = (prediction * 6) / 5000;
 
+  Serial.print("Predicted Power: ");
+  Serial.println(predicted_power);
 
-  Blynk.virtualWrite(V0, temp); 
-  Blynk.virtualWrite(V1, humidity); 
-  Blynk.virtualWrite(V2, wind); 
-  Blynk.virtualWrite(V3, visible); 
-  Blynk.virtualWrite(V11, prepower); 
-  Blynk.virtualWrite(V5, voltage_value); 
-  Blynk.virtualWrite(V6, mA); 
-  Blynk.virtualWrite(V7, power); 
-  Blynk.virtualWrite(V8, irr); 
-  Blynk.virtualWrite(V9, pressure); 
-  
+  // ===== BLYNK SEND =====
+  Blynk.virtualWrite(V0, tempC);
+  Blynk.virtualWrite(V1, humidity);
+  Blynk.virtualWrite(V2, wind);
+  Blynk.virtualWrite(V3, visibility / 1000);
+  Blynk.virtualWrite(V5, voltage_value);
+  Blynk.virtualWrite(V6, current_A);
+  Blynk.virtualWrite(V7, power_W);
+  Blynk.virtualWrite(V8, irr);
+  Blynk.virtualWrite(V9, pressure);
+  Blynk.virtualWrite(V11, predicted_power);
+
   Blynk.run();
   timer.run();
-  printLocalTime();
 
+  delay(2000);
 }
